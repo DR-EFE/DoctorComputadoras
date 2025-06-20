@@ -188,6 +188,66 @@ class DiagnosticEngine {
             id = "force_restart",
             text = "¿Tienes que apagar la computadora manteniendo presionado el botón de encendido?",
             type = QuestionType.YES_NO
+        ),
+        // 🔹 Preguntas nuevas sugeridas
+
+        // Temperatura
+        Question(
+            id = "overheating",
+            text = "¿Has notado que la computadora se calienta mucho o el ventilador suena muy fuerte?",
+            type = QuestionType.YES_NO
+        ),
+
+        // Actualizaciones
+        Question(
+            id = "recent_updates",
+            text = "¿Tu computadora se actualizó recientemente o instalaste nuevos programas?",
+            type = QuestionType.YES_NO
+        ),
+
+        // Espacio en disco
+        Question(
+            id = "low_disk_space",
+            text = "¿Tu disco duro tiene poco espacio libre?",
+            type = QuestionType.YES_NO
+        ),
+
+        // Virus o malware
+        Question(
+            id = "antivirus_scan",
+            text = "¿Has pasado un antivirus recientemente?",
+            type = QuestionType.MULTIPLE_CHOICE,
+            options = listOf(
+                "Sí, y no encontró nada",
+                "Sí, encontró virus y los eliminé",
+                "No he pasado antivirus"
+            )
+        ),
+
+        // Errores recientes
+        Question(
+            id = "blue_screen",
+            text = "¿Alguna vez ha aparecido una pantalla azul con un mensaje de error?",
+            type = QuestionType.YES_NO
+        ),
+
+        // Fuente de energía
+        Question(
+            id = "power_source",
+            text = "¿Usas laptop con batería o siempre conectada al cargador?",
+            type = QuestionType.MULTIPLE_CHOICE,
+            options = listOf(
+                "Siempre con batería",
+                "Siempre conectada al cargador",
+                "Ambas opciones"
+            )
+        ),
+
+        // Ruido inusual
+        Question(
+            id = "unusual_noises",
+            text = "¿Escuchas ruidos extraños (clics, zumbidos) dentro de la computadora?",
+            type = QuestionType.YES_NO
         )
     )
 
@@ -1038,57 +1098,149 @@ class DiagnosticEngine {
         val frequency = answers["freeze_frequency"]
         val pattern = answers["freeze_pattern"]
         val forceRestart = answers["force_restart"] == "Sí"
+        val overheating = answers["overheating"] == "Sí"
+        val lowDiskSpace = answers["low_disk_space"] == "Sí"
+        val antivirusScan = answers["antivirus_scan"]
+        val blueScreen = answers["blue_screen"] == "Sí"
+        val unusualNoises = answers["unusual_noises"] == "Sí"
+        val recentUpdates = answers["recent_updates"] == "Sí"
 
         return when {
+            // Caso 1: Congelamiento grave y requiere técnico
             frequency == "Varias veces al día" && forceRestart -> DiagnosticResult(
                 title = "Problema crítico del sistema",
-                description = "Tu computadora tiene un problema serio que requiere atención técnica",
+                description = "Tu computadora tiene un problema serio que requiere atención técnica.",
                 severity = SeverityLevel.HIGH,
                 solutions = listOf(
-                    Solution(1, "Haz respaldo de tus archivos importantes"),
-                    Solution(2, "Verifica que no esté sobrecalentándose"),
-                    Solution(3, "Consulta con un técnico - puede ser memoria RAM o disco duro")
-                ),
-                probability = 80
-            )
-            pattern == "Al abrir programas específicos" -> DiagnosticResult(
-                title = "Problema con programas específicos",
-                description = "Algunos programas están causando conflictos o están dañados",
-                severity = SeverityLevel.MEDIUM,
-                solutions = listOf(
-                    Solution(1, "Identifica qué programas causan el problema"),
-                    Solution(2, "Reinstala esos programas"),
-                    Solution(3, "Verifica si tienes suficiente memoria RAM"),
-                    Solution(4, "Evita usar esos programas hasta solucionarlo")
-                ),
-                probability = 75
-            )
-            pattern == "Al hacer varias cosas a la vez" -> DiagnosticResult(
-                title = "Falta de recursos del sistema",
-                description = "Tu computadora no tiene suficiente memoria para todo lo que quieres hacer",
-                severity = SeverityLevel.LOW,
-                solutions = listOf(
-                    Solution(1, "Cierra programas que no estés usando"),
-                    Solution(2, "Reinicia la computadora regularmente"),
-                    Solution(3, "Evita tener muchos programas abiertos simultáneamente"),
-                    Solution(4, "Considera agregar más memoria RAM")
+                    Solution(1, "Haz respaldo de tus archivos importantes."),
+                    Solution(2, "Verifica que no esté sobrecalentándose."),
+                    Solution(3, "Consulta con un técnico - puede ser la memoria RAM o el disco duro.")
                 ),
                 probability = 85
             )
-            else -> DiagnosticResult(
-                title = "Congelamiento del sistema",
-                description = "Problema general que puede tener varias causas",
+
+            // Caso 2: Congelamiento por temperatura alta
+            overheating -> DiagnosticResult(
+                title = "Sobrecalentamiento",
+                description = "Tu computadora se calienta demasiado y se congela para protegerse.",
+                severity = SeverityLevel.HIGH,
+                solutions = listOf(
+                    Solution(1, "Limpia el ventilador y las rejillas de ventilación."),
+                    Solution(2, "Colócala en un lugar ventilado y evita tapar la salida de aire."),
+                    Solution(3, "Usa una base de enfriamiento si es una laptop.")
+                ),
+                probability = 90
+            )
+
+            // Caso 3: Congelamiento por espacio en disco
+            lowDiskSpace -> DiagnosticResult(
+                title = "Espacio en disco insuficiente",
+                description = "Tu computadora tiene poco espacio libre, lo que puede causar congelamientos.",
                 severity = SeverityLevel.MEDIUM,
                 solutions = listOf(
-                    Solution(1, "Verifica que no esté sobrecalentándose"),
-                    Solution(2, "Haz una limpieza de archivos temporales"),
-                    Solution(3, "Ejecuta un antivirus completo"),
-                    Solution(4, "Si persiste, consulta un técnico")
+                    Solution(1, "Elimina archivos que no necesites."),
+                    Solution(2, "Desinstala programas que no uses."),
+                    Solution(3, "Vacía la papelera de reciclaje y limpia archivos temporales.")
+                ),
+                probability = 80
+            )
+
+            // Caso 4: Posible infección de virus o malware
+            antivirusScan == "No he pasado antivirus" -> DiagnosticResult(
+                title = "Posible virus o malware",
+                description = "No has pasado antivirus y esto podría causar bloqueos y congelamientos.",
+                severity = SeverityLevel.MEDIUM,
+                solutions = listOf(
+                    Solution(1, "Instala y ejecuta un antivirus de confianza."),
+                    Solution(2, "Elimina archivos sospechosos detectados."),
+                    Solution(3, "Mantén actualizado tu antivirus.")
+                ),
+                probability = 75
+            )
+
+            // Caso 5: Error grave del sistema con pantalla azul
+            blueScreen -> DiagnosticResult(
+                title = "Error crítico (pantalla azul)",
+                description = "Una pantalla azul indica un fallo grave de hardware o sistema.",
+                severity = SeverityLevel.HIGH,
+                solutions = listOf(
+                    Solution(1, "Anota el código de error de la pantalla azul."),
+                    Solution(2, "Busca en internet soluciones para ese código."),
+                    Solution(3, "Consulta a un técnico si sigue ocurriendo.")
+                ),
+                probability = 90
+            )
+
+            // Caso 6: Posible problema físico del disco duro
+            unusualNoises -> DiagnosticResult(
+                title = "Posible daño físico del disco duro",
+                description = "Escuchar ruidos extraños puede indicar que el disco duro está fallando.",
+                severity = SeverityLevel.HIGH,
+                solutions = listOf(
+                    Solution(1, "Haz una copia de seguridad de tus archivos importantes de inmediato."),
+                    Solution(2, "Evita mover la computadora bruscamente."),
+                    Solution(3, "Consulta a un técnico para revisar el disco duro.")
+                ),
+                probability = 85
+            )
+
+            // Caso 7: Problema después de actualización reciente
+            recentUpdates -> DiagnosticResult(
+                title = "Problema después de actualización",
+                description = "Es posible que una actualización reciente esté causando conflictos.",
+                severity = SeverityLevel.MEDIUM,
+                solutions = listOf(
+                    Solution(1, "Revisa si hay actualizaciones pendientes para completarlas."),
+                    Solution(2, "Considera desinstalar la última actualización si empezó después de ella."),
+                    Solution(3, "Reinicia la computadora después de aplicar cambios.")
+                ),
+                probability = 70
+            )
+
+            // Caso 8: Congelamiento por programa específico
+            pattern == "Al abrir programas específicos" -> DiagnosticResult(
+                title = "Problema con programas específicos",
+                description = "Algunos programas están causando conflictos o errores.",
+                severity = SeverityLevel.MEDIUM,
+                solutions = listOf(
+                    Solution(1, "Identifica cuáles programas causan el problema."),
+                    Solution(2, "Reinstala esos programas."),
+                    Solution(3, "Verifica si tienes suficiente memoria RAM."),
+                    Solution(4, "Actualiza esos programas a la última versión.")
+                ),
+                probability = 75
+            )
+
+            // Caso 9: Congelamiento por múltiples tareas
+            pattern == "Al hacer varias cosas a la vez" -> DiagnosticResult(
+                title = "Falta de recursos del sistema",
+                description = "Tu computadora no tiene suficiente memoria o recursos para tantas tareas a la vez.",
+                severity = SeverityLevel.LOW,
+                solutions = listOf(
+                    Solution(1, "Cierra programas que no estés usando."),
+                    Solution(2, "Evita tener muchas pestañas o aplicaciones abiertas."),
+                    Solution(3, "Reinicia la computadora con frecuencia."),
+                    Solution(4, "Considera aumentar la memoria RAM si es posible.")
+                ),
+                probability = 85
+            )
+
+            // Caso general
+            else -> DiagnosticResult(
+                title = "Congelamiento general",
+                description = "El congelamiento puede deberse a varias causas posibles.",
+                severity = SeverityLevel.MEDIUM,
+                solutions = listOf(
+                    Solution(1, "Verifica si hay actualizaciones pendientes."),
+                    Solution(2, "Ejecuta un antivirus completo."),
+                    Solution(3, "Limpia archivos temporales y optimiza el disco."),
+                    Solution(4, "Consulta a un técnico si el problema continúa.")
                 ),
                 probability = 65
             )
         }
     }
+
 
     private fun diagnoseOverheating(answers: Map<String, String>): DiagnosticResult {
         val heatLocation = answers["heat_location"]
