@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -338,6 +339,8 @@ fun ActionButtonsSection(
     severity: SeverityLevel,
     navigator: cafe.adriel.voyager.navigator.Navigator
 ) {
+    val context = LocalContext.current
+
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -345,7 +348,12 @@ fun ActionButtonsSection(
         when (severity) {
             SeverityLevel.HIGH -> {
                 Button(
-                    onClick = { /* Buscar técnicos cerca */ },
+                    onClick = {
+                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
+                            data = android.net.Uri.parse("https://www.google.com/maps/search/tecnicos+de+soporte+y+mantenimiento+cerca+de+mi/@19.40022,-99.0902881,15z/data=!3m1!4b1?entry=ttu&g_ep=EgoyMDI1MDYxNi4wIKXMDSoASAFQAw%3D%3D")
+                        }
+                        context.startActivity(intent)
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp),
@@ -364,7 +372,9 @@ fun ActionButtonsSection(
                 ) {
                     OutlinedButton(
                         onClick = { /* Más información */ },
-                        modifier = Modifier.weight(1f).height(48.dp),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp),
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Text("📚 Más info", fontSize = 14.sp)
@@ -372,7 +382,9 @@ fun ActionButtonsSection(
 
                     Button(
                         onClick = { /* Buscar ayuda */ },
-                        modifier = Modifier.weight(1f).height(48.dp),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp),
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Text("🆘 Pedir ayuda", fontSize = 14.sp)
@@ -392,7 +404,6 @@ fun ActionButtonsSection(
             }
         }
 
-        // Botón para nuevo diagnóstico
         OutlinedButton(
             onClick = {
                 navigator.popAll()
